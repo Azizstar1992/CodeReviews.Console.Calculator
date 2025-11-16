@@ -1,19 +1,49 @@
 // CalculatorLibrary.cs
+
+
 using Newtonsoft.Json;
 
 namespace CalculatorLibrary
 {
+    public class Counter
+    {
+        private static string filePath = "./counter.json";
+
+        public static int Increment()
+        {
+            int count = 0;
+
+            if (File.Exists(filePath))
+            {
+                string json = File.ReadAllText(filePath);
+                var data = JsonConvert.DeserializeObject<Dictionary<string, int>>(json);
+                count = data["count"];
+            }
+
+            count++;
+
+            var newJson = JsonConvert.SerializeObject(
+                new Dictionary<string, int> { { "count", count } },
+                Formatting.Indented
+            );
+
+            File.WriteAllText(filePath, newJson);
+
+            return count;
+        }
+    }
+
     public class Calculator
     {
-
-        JsonWriter writer;
-
+        private JsonWriter writer;
         public Calculator()
         {
             StreamWriter logFile = File.CreateText("calculatorlog.json");
             logFile.AutoFlush = true;
-            writer = new JsonTextWriter(logFile);
+
+            writer = new JsonTextWriter(logFile);   // <-- FIXED
             writer.Formatting = Formatting.Indented;
+
             writer.WriteStartObject();
             writer.WritePropertyName("Operations");
             writer.WriteStartArray();
@@ -21,48 +51,54 @@ namespace CalculatorLibrary
 
         public double DoOperation(double num1, double num2, string op)
         {
-            double result = double.NaN; // Default value is "not-a-number" if an operation, such as division, could result in an error.
+            double result = double.NaN;
+
             writer.WriteStartObject();
             writer.WritePropertyName("Operand1");
             writer.WriteValue(num1);
             writer.WritePropertyName("Operand2");
             writer.WriteValue(num2);
             writer.WritePropertyName("Operation");
-            // Use a switch statement to do the math.
+
             switch (op)
             {
                 case "a":
                     result = num1 + num2;
                     writer.WriteValue("Add");
                     break;
+
                 case "s":
                     result = num1 - num2;
                     writer.WriteValue("Subtract");
                     break;
+
                 case "m":
                     result = num1 * num2;
                     writer.WriteValue("Multiply");
                     break;
+
                 case "d":
-                    // Ask the user to enter a non-zero divisor.
-                    if (num2 != 0)
-                    {
-                        result = num1 / num2;
-                    }
                     writer.WriteValue("Divide");
+                    if (num2 != 0)
+                        result = num1 / num2;
                     break;
-                // Return text for an incorrect option entry.
+
                 default:
+                    writer.WriteValue("Invalid");
                     break;
             }
+
             writer.WritePropertyName("Result");
             writer.WriteValue(result);
             writer.WriteEndObject();
 
+            int current = Counter.Increment();
+            Console.WriteLine($"Program has been run {current} times.");
+
             return result;
         }
 
-        public  void Finish()
+        public void Finish()
         {
             writer.WriteEndArray();
             writer.WriteEndObject();

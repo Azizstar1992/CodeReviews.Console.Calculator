@@ -77,7 +77,7 @@ class Program
             Console.WriteLine("------------------------\n");
 
            
-            Console.Write("Press 'n' and Enter to close the app, or press any other key and Enter to continue: ");
+            Console.Write("Enter 'n' or enter any other key to continue: ");
             if (Console.ReadLine() == "n") endGame = true;
 
             Console.WriteLine("\n");
