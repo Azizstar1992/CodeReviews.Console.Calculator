@@ -41,7 +41,7 @@ namespace CalculatorLibrary
             StreamWriter logFile = File.CreateText("calculatorlog.json");
             logFile.AutoFlush = true;
 
-            writer = new JsonTextWriter(logFile);   // <-- FIXED
+            writer = new JsonTextWriter(logFile); 
             writer.Formatting = Formatting.Indented;
 
             writer.WriteStartObject();
